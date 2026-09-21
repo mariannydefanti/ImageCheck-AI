@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ImageCheck AI</title>
+  <meta name="description" content="ImageCheck AI — análise de imagens e sinais de manipulação digital.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#inicio"><span class="brand-mark">◈</span> ImageCheck <b>AI</b></a>
+  <nav>
+    <a href="#inicio">Início</a>
+    <a href="#como-funciona">Como Funciona</a>
+    <a href="#precos">Preços</a>
+    <a href="#sobre">Sobre nós</a>
+  </nav>
+  <a class="login-btn" href="#sobre">Entrar</a>
+</header>
+
+<main id="inicio">
+<section class="hero">
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+  <div class="hero-inner">
+    <div class="eyebrow">PROTEÇÃO CONTRA MANIPULAÇÃO DIGITAL</div>
+    <h1>Imagem Real ou <span>Gerada por IA?</span></h1>
+    <p class="hero-sub">Envie uma imagem e consulte sinais técnicos que ajudam a avaliar conteúdo digital antes de compartilhá-lo.</p>
+
+    <div class="upload-card" id="dropZone">
+      <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+      <div class="upload-symbol">↥</div>
+      <h2>Envie ou arraste sua imagem</h2>
+      <p>PNG, JPG ou WEBP · análise segura</p>
+      <button class="upload-btn" id="chooseBtn" type="button">Escolher imagem</button>
+      <div id="fileName" class="file-name"></div>
+      <div id="loading" class="loading hidden"><span></span> Analisando...</div>
+    </div>
+
+    <div class="privacy">
+      <span>🔒</span>
+      <div><strong>Privacidade em primeiro lugar</strong><br>
+      A imagem é enviada somente ao serviço de análise configurado pelo projeto. Evite enviar imagens pessoais ou sensíveis sem autorização.</div>
+    </div>
+  </div>
+</section>
+
+<section class="results" id="resultado">
+  <div class="container">
+    <div class="result-header">
+      <div>
+        <div class="section-label">RESULTADO DA ANÁLISE</div>
+        <h2 id="resultTitle">Envie uma imagem para começar</h2>
+      </div>
+      <div id="statusPill" class="pill">Aguardando</div>
+    </div>
+
+    <div class="result-grid">
+      <article class="panel">
+        <div class="panel-title">Imagem analisada</div>
+        <div id="preview" class="preview"><span>Sua imagem aparecerá aqui</span></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title">Sinais encontrados</div>
+        <div id="signals" class="signals">
+          <div class="signal"><div class="signal-icon">⌁</div><div><b>Textura e detalhes</b><p>Aguardando análise.</p></div></div>
+          <div class="signal"><div class="signal-icon">◉</div><div><b>Rosto e elementos</b><p>Aguardando análise.</p></div></div>
+          <div class="signal"><div class="signal-icon">⌘</div><div><b>Conteúdo e metadados</b><p>Aguardando análise.</p></div></div>
+        </div>
+      </article>
+    </div>
+
+    <div id="visionResult" class="vision-result">
+      <div class="vision-head"><span>GOOGLE CLOUD VISION</span><b id="visionStatus">Não conectado</b></div>
+      <p id="visionMessage">O projeto está preparado para receber os resultados da Cloud Vision API.</p>
+      <div id="chips" class="chips"></div>
+    </div>
+
+    <div class="notice">
+      <b>Importante:</b> a Cloud Vision API fornece recursos como rótulos, rostos e SafeSearch, mas isso não significa que ela seja, sozinha, um detector de imagens geradas por IA. Para a parte “real x gerada”, o projeto deve conectar um modelo de detecção de conteúdo sintético/deepfake validado. 
+    </div>
+  </div>
+</section>
+
+<section class="how" id="como-funciona">
+  <div class="section-heading">
+    <div class="section-label">COMO FUNCIONA</div>
+    <h2>Uma camada de proteção antes de compartilhar</h2>
+    <p>O ImageCheck AI foi pensado para combinar análise automatizada, explicação dos sinais e educação digital.</p>
+  </div>
+  <div class="steps">
+    <article><span>01</span><h3>Enviar</h3><p>O usuário seleciona a imagem que deseja verificar.</p></article>
+    <article><span>02</span><h3>Analisar</h3><p>O backend envia a imagem para os serviços de análise configurados.</p></article>
+    <article><span>03</span><h3>Explicar</h3><p>O site transforma os resultados técnicos em informações fáceis de entender.</p></article>
+    <article><span>04</span><h3>Prevenir</h3><p>O alerta incentiva uma verificação antes do compartilhamento.</p></article>
+  </div>
+</section>
+
+<section class="plans" id="precos">
+  <div class="section-heading">
+    <div class="section-label">MODELO DE USO</div>
+    <h2>Feito para crescer com o projeto</h2>
+  </div>
+  <div class="plan-grid">
+    <article><h3>Escola</h3><strong>Educacional</strong><p>Uso para conscientização, cidadania digital e prevenção.</p></article>
+    <article class="featured"><div class="tag">PROJETO</div><h3>ImageCheck AI</h3><strong>Em desenvolvimento</strong><p>Interface, API e arquitetura preparadas para análise de imagens.</p></article>
+    <article><h3>Plataformas</h3><strong>Integração</strong><p>Possibilidade futura de integração com sistemas de moderação.</p></article>
+  </div>
+</section>
+
+<section class="about" id="sobre">
+  <div>
+    <div class="section-label">SOBRE O PROJETO</div>
+    <h2>Tecnologia usada para prevenir danos digitais.</h2>
+  </div>
+  <p>A proposta é ajudar a identificar sinais de manipulação e reduzir o compartilhamento irresponsável de imagens. O projeto prioriza privacidade, explicabilidade e encaminhamento seguro quando houver suspeita de abuso.</p>
+</section>
+</main>
+
+<footer><a class="brand footer-brand" href="#inicio"><span class="brand-mark">◈</span> ImageCheck <b>AI</b></a><span>Protótipo acadêmico · 2026</span></footer>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
