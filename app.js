@@ -1,4 +1,5 @@
-const API_URL = (window.IMAGECHECK_API_URL || "").replace(/\/$/, "");
+const API_URL = "";
+
 const fileInput = document.getElementById("fileInput");
 const chooseBtn = document.getElementById("chooseBtn");
 const dropZone = document.getElementById("dropZone");
@@ -12,82 +13,149 @@ const visionMessage = document.getElementById("visionMessage");
 const chips = document.getElementById("chips");
 const signals = document.getElementById("signals");
 
-chooseBtn.addEventListener("click", e => { e.stopPropagation(); fileInput.click(); });
+chooseBtn.addEventListener("click", e => {
+  e.stopPropagation();
+  fileInput.click();
+});
+
 dropZone.addEventListener("click", () => fileInput.click());
-["dragenter","dragover"].forEach(t => dropZone.addEventListener(t, e => { e.preventDefault(); dropZone.classList.add("drag"); }));
-["dragleave","drop"].forEach(t => dropZone.addEventListener(t, e => { e.preventDefault(); dropZone.classList.remove("drag"); }));
-dropZone.addEventListener("drop", e => { const f=e.dataTransfer.files[0]; if(f) analyze(f); });
-fileInput.addEventListener("change", e => { const f=e.target.files[0]; if(f) analyze(f); });
+
+["dragenter", "dragover"].forEach(type => {
+  dropZone.addEventListener(type, e => {
+    e.preventDefault();
+    dropZone.classList.add("drag");
+  });
+});
+
+["dragleave", "drop"].forEach(type => {
+  dropZone.addEventListener(type, e => {
+    e.preventDefault();
+    dropZone.classList.remove("drag");
+  });
+});
+
+dropZone.addEventListener("drop", e => {
+  const file = e.dataTransfer.files[0];
+  if (file) analyze(file);
+});
+
+fileInput.addEventListener("change", e => {
+  const file = e.target.files[0];
+  if (file) analyze(file);
+});
 
 function setSignals(items) {
-  signals.innerHTML = items.map(x => `
+  signals.innerHTML = items.map(item => `
     <div class="signal">
-      <div class="signal-icon">${x.icon}</div>
-      <div><b>${escapeHtml(x.title)}</b><p>${escapeHtml(x.text)}</p></div>
-    </div>`).join("");
+      <div class="signal-icon">${item.icon}</div>
+      <div>
+        <b>${escapeHtml(item.title)}</b>
+        <p>${escapeHtml(item.text)}</p>
+      </div>
+    </div>
+  `).join("");
 }
 
 async function analyze(file) {
   if (!file.type.startsWith("image/")) return;
+
   fileName.textContent = `Arquivo: ${file.name}`;
   preview.innerHTML = "";
+
+  const imageUrl = URL.createObjectURL(file);
   const img = document.createElement("img");
-  img.src = URL.createObjectURL(file);
+  img.src = imageUrl;
   img.alt = "Imagem selecionada";
   preview.appendChild(img);
 
   resultTitle.textContent = "Analisando imagem...";
   statusPill.textContent = "Processando";
-  visionStatus.textContent = API_URL ? "Conectado" : "Não conectado";
+  visionStatus.textContent = "Análise local";
+  visionMessage.textContent =
+    "Analisando informações técnicas da imagem diretamente no navegador.";
   chips.innerHTML = "";
   loading.classList.remove("hidden");
 
-  if (!API_URL) {
-    loading.classList.add("hidden");
-    statusPill.textContent = "Modo demonstração";
-    resultTitle.textContent = "Imagem carregada";
-    visionMessage.textContent = "O frontend está pronto. Falta apenas colocar a URL do backend Cloud Run em config.js.";
-    setSignals([
-      {icon:"⌁",title:"Textura e detalhes",text:"Pronto para receber resultados do seu modelo de análise."},
-      {icon:"◉",title:"Rosto e elementos",text:"A Cloud Vision poderá retornar informações sobre rostos e objetos."},
-      {icon:"⌘",title:"Conteúdo",text:"O SafeSearch poderá sinalizar categorias de conteúdo potencialmente sensível."}
-    ]);
-    return;
-  }
-
-  const form = new FormData();
-  form.append("image", file);
-
   try {
-    const response = await fetch(`${API_URL}/api/analyze`, { method:"POST", body:form });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Falha na análise");
+    const probe = new Image();
 
-    statusPill.textContent = "Analisado";
-    resultTitle.textContent = "Análise concluída";
-    visionStatus.textContent = "Cloud Vision OK";
-    visionMessage.textContent = "Resultados retornados pelo backend. Eles são sinais auxiliares e não comprovam, sozinhos, que uma imagem seja real ou gerada por IA.";
+    await new Promise((resolve, reject) => {
+      probe.onload = resolve;
+      probe.onerror = reject;
+      probe.src = imageUrl;
+    });
 
-    chips.innerHTML = (data.labels || []).map(l => `<span class="chip">${escapeHtml(l.description)} · ${Math.round((l.score||0)*100)}%</span>`).join("");
+    const width = probe.naturalWidth;
+    const height = probe.naturalHeight;
+    const megapixels = ((width * height) / 1000000).toFixed(2);
+    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
 
-    const faceText = `${data.faces ?? 0} rosto(s) detectado(s)`;
-    const adult = data.safeSearch?.adult || "UNKNOWN";
-    const violence = data.safeSearch?.violence || "UNKNOWN";
+    const signalsFound = [];
+
+    if (width === height) {
+      signalsFound.push("formato quadrado");
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      signalsFound.push("arquivo grande");
+    }
+
+    if (width >= 3000 || height >= 3000) {
+      signalsFound.push("alta resolução");
+    }
+
+    statusPill.textContent = "Análise concluída";
+    resultTitle.textContent = "Imagem analisada";
+    visionStatus.textContent = "Modo gratuito";
+
+    visionMessage.textContent =
+      "O protótipo apresenta sinais técnicos da imagem. Esses sinais não comprovam, sozinhos, que uma imagem foi gerada por IA.";
+
+    chips.innerHTML = `
+      <span class="chip">${escapeHtml(file.type || "Formato desconhecido")}</span>
+      <span class="chip">${width} × ${height}px</span>
+      <span class="chip">${megapixels} MP</span>
+      <span class="chip">${sizeMB} MB</span>
+    `;
+
     setSignals([
-      {icon:"⌁",title:"Rótulos visuais",text:(data.labels||[]).slice(0,4).map(x=>x.description).join(", ") || "Nenhum rótulo relevante retornado."},
-      {icon:"◉",title:"Detecção de rostos",text:faceText},
-      {icon:"⌘",title:"SafeSearch",text:`Adulto: ${adult} · Violência: ${violence}`}
+      {
+        icon: "⌁",
+        title: "Formato e tamanho",
+        text: `${file.type || "Desconhecido"} · ${sizeMB} MB`
+      },
+      {
+        icon: "◉",
+        title: "Dimensões",
+        text: `${width} × ${height}px · ${megapixels} MP`
+      },
+      {
+        icon: "⌘",
+        title: "Sinais técnicos",
+        text: signalsFound.length
+          ? `Foram encontrados: ${signalsFound.join(", ")}. Isso não comprova uso de IA.`
+          : "Nenhum sinal técnico básico foi destacado. Isso também não comprova que a imagem seja real."
+      }
     ]);
-  } catch (err) {
+
+  } catch (error) {
     statusPill.textContent = "Erro";
-    resultTitle.textContent = "Não foi possível concluir a análise";
+    resultTitle.textContent = "Não foi possível analisar a imagem";
     visionStatus.textContent = "Falha";
-    visionMessage.textContent = err.message;
+    visionMessage.textContent =
+      "Tente selecionar uma imagem JPG, PNG ou WebP.";
   } finally {
     loading.classList.add("hidden");
+    URL.revokeObjectURL(imageUrl);
   }
 }
 
 function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  return String(value).replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[character]));
 }
